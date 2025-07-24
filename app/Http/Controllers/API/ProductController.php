@@ -15,16 +15,6 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-         // Get the Authorization header
-        $token = $request->header('Authorization');
-
-        // Optional: log or return token for debugging
-        if (!$token) {
-            return response()->json([
-                'message' => 'No token provided in Authorization header',
-                'status' => 'error'
-            ], 401);
-        }
 
         // Retrieve all products
         $products = Product::all();
@@ -49,16 +39,6 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        // Get the Authorization header
-        $token = $request->header('Authorization');
-
-        // Optional: log or return token for debugging
-        if (!$token) {
-            return response()->json([
-                'message' => 'No token provided in Authorization header',
-                'status' => 'error'
-            ], 401);
-        }
 
         try {
             $validatedData = $request->validate([
@@ -101,7 +81,20 @@ class ProductController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $product = Product::find($id);
+
+        if (!$product) {
+            return response()->json([
+                'message' => 'Product not found',
+                'status' => 'error'
+            ], 404);
+        }
+        // Return response
+        return response()->json([
+            'message' => 'Product retrieved successfully',
+            'product' => $product,
+            'status' => 'success'
+        ], 200);
     }
 
     /**
@@ -109,7 +102,59 @@ class ProductController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+
+        // Check if product ID is provided
+        if (!$id) {
+            return response()->json([
+                'message' => 'Product ID is required',
+                'status' => 'error'
+            ], 400);
+        }
+
+        // Find the product
+        $product = Product::find($id);
+
+        // Check if product exists
+        if (!$product) {
+            return response()->json([
+                'message' => 'Product not found',
+                'status' => 'error'
+            ], 404);
+        }
+        try {
+            $validatedData = $request->validate([
+                'name' => 'sometimes|required|string|max:255',
+                'description' => 'nullable|string',
+                'price' => 'sometimes|required|numeric|min:0',
+                'quantity' => 'sometimes|required|integer|min:0',
+                'category' => 'sometimes|required|string|max:255',
+                'status' => 'sometimes|boolean'
+            ]);
+
+            // Update product
+            $product->update($validatedData);
+
+            // Return response
+            return response()->json([
+                'message' => 'Product updated successfully',
+                'product' => $product,
+                'status' => 'success'
+            ], 200);
+
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+                'status' => 'error'
+            ], 422);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while updating the product',
+                'error' => $e->getMessage(),
+                'status' => 'error'
+            ], 500);
+        }
     }
 
     /**
@@ -117,6 +162,30 @@ class ProductController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        // Check if product ID is provided
+        if (!$id) {
+            return response()->json([
+                'message' => 'Product ID is required',
+                'status' => 'error'
+            ], 400);
+        }
+        
+        // Find the product
+        $product = Product::find($id);
+        if (!$product) {
+            return response()->json([
+                'message' => 'Product not found',
+                'status' => 'error'
+            ], 404);
+        }
+
+        // Delete product
+        $product->delete();
+
+        // Return response
+        return response()->json([
+            'message' => 'Product deleted successfully',
+            'status' => 'success'
+        ], 200);
     }
 }
