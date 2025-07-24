@@ -30,20 +30,23 @@ class AuthenticationController extends Controller
 
             // Return response
             return response()->json([
-                'message' => 'User registered successfully'
+                'message' => 'User registered successfully',
+                'status' => 'success'
             ], 201);
 
         } catch (ValidationException $e) {
             // Validation errors
             return response()->json([
                 'message' => 'Validation failed, please check your input',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
+                'status' => 'error'
             ], 422);
 
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'An error occurred during registration, try again later',
-                'error' => $e->getMessage() 
+                'error' => $e->getMessage(),
+                'status' => 'error'
             ], 500);
         }
     }
@@ -61,7 +64,8 @@ class AuthenticationController extends Controller
 
             if (!$user || !Hash::check($request->password, $user->password)) {
                 return response()->json([
-                    'message' => 'Invalid Email or Password'
+                    'message' => 'Invalid Email or Password',
+                    'status' => 'error'
                 ], 401);
             }
 
@@ -72,20 +76,23 @@ class AuthenticationController extends Controller
             return response()->json([
                 'message' => 'Login successful',
                 'user' => $user,
-                'token' => $token
+                'token' => $token,
+                'status' => 'success'
             ], 200);
 
 
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Validation failed, please check your input',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
+                'status' => 'error'
             ], 422);
 
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'An error occurred during login, try again later',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'status' => 'error'
             ], 500);
         }
     }
