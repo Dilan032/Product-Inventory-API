@@ -70,13 +70,15 @@ class AuthenticationController extends Controller
             }
 
             // Create token
-            $token = $user->createToken('API Token')->plainTextToken;
+            $API_TOKEN_in_env_file = env('API_TOKEN');
+            $token = $user->createToken($API_TOKEN_in_env_file)->plainTextToken;
 
             // Return response
             return response()->json([
                 'message' => 'Login successful',
                 'user' => $user,
                 'token' => $token,
+                // 'planetext' => $API_TOKEN_in_env_file,
                 'status' => 'success'
             ], 200);
 
